@@ -60,8 +60,6 @@ const modelIds = [
   'gpt-4o-puter',
   'gpt-5.2-puter',
   'gpt-5.4-puter',
-  'gpt-5-mini-puter',
-  'gpt-5-nano-puter',
   'gpt-5.4-mini-puter',
   'gpt-5.4-nano-puter',
   'claude-opus-4-7-puter',
