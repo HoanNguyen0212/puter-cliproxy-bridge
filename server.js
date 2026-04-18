@@ -120,10 +120,14 @@ app.post('/v1/chat/completions', async (req, res) => {
     };
 
     if (body.stream) {
+      res.status(200);
       res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
       res.setHeader('Cache-Control', 'no-cache, no-transform');
       res.setHeader('Connection', 'keep-alive');
-      const chunk = {
+      res.setHeader('X-Accel-Buffering', 'no');
+      res.flushHeaders?.();
+
+      const firstChunk = {
         id: completion.id,
         object: 'chat.completion.chunk',
         created: completion.created,
@@ -132,11 +136,29 @@ app.post('/v1/chat/completions', async (req, res) => {
           {
             index: 0,
             delta: { role: 'assistant', content: text },
-            finish_reason: 'stop'
+            finish_reason: null,
+            native_finish_reason: null
           }
         ]
       };
-      res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+      const finalChunk = {
+        id: completion.id,
+        object: 'chat.completion.chunk',
+        created: completion.created,
+        model: requestedModel,
+        choices: [
+          {
+            index: 0,
+            delta: {},
+            finish_reason: 'stop',
+            native_finish_reason: 'stop'
+          }
+        ],
+        usage: completion.usage
+      };
+
+      res.write(`data: ${JSON.stringify(firstChunk)}\n\n`);
+      res.write(`data: ${JSON.stringify(finalChunk)}\n\n`);
       res.write('data: [DONE]\n\n');
       res.end();
       return;
