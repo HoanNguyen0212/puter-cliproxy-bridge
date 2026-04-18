@@ -100,8 +100,7 @@ app.post('/v1/chat/completions', async (req, res) => {
     const resp = await puter.ai.chat(messages, opts);
     const text = extractAssistantText(resp);
     const usage = resp?.usage || {};
-
-    res.json({
+    const completion = {
       id: 'chatcmpl-' + Date.now(),
       object: 'chat.completion',
       created: Math.floor(Date.now() / 1000),
@@ -118,7 +117,32 @@ app.post('/v1/chat/completions', async (req, res) => {
         completion_tokens: usage.completion_tokens ?? usage.output_tokens ?? 0,
         total_tokens: usage.total_tokens ?? ((usage.prompt_tokens ?? usage.input_tokens ?? 0) + (usage.completion_tokens ?? usage.output_tokens ?? 0))
       }
-    });
+    };
+
+    if (body.stream) {
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('Connection', 'keep-alive');
+      const chunk = {
+        id: completion.id,
+        object: 'chat.completion.chunk',
+        created: completion.created,
+        model: requestedModel,
+        choices: [
+          {
+            index: 0,
+            delta: { role: 'assistant', content: text },
+            finish_reason: 'stop'
+          }
+        ]
+      };
+      res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+      return;
+    }
+
+    res.json(completion);
   } catch (error) {
     console.error('bridge error:', error?.stack || error?.message || error);
     res.status(500).json({
