@@ -58,19 +58,18 @@ app.get('/health', (_req, res) => {
 
 const modelIds = [
   'gpt-4o-puter',
-  'gpt-5-puter',
   'gpt-5.2-puter',
-  'gpt-5.3-codex-puter',
   'gpt-5.4-puter',
-  'gpt-5.4-mini-puter',
+  'gpt-5-mini-puter',
   'gpt-5-nano-puter',
+  'gpt-5.4-mini-puter',
+  'gpt-5.4-nano-puter',
   'claude-opus-4-7-puter',
   'claude-sonnet-4-6-puter',
   'deepseek-chat-puter',
-  'deepseek-reasoner-puter',
   'gemini-2.5-flash-puter',
-  'gemini-2.5-pro-puter',
-  'grok-4-puter'
+  'gemini-3-flash-preview-puter',
+  'gemini-3.1-pro-preview-puter'
 ];
 
 app.get('/v1/models', (_req, res) => {
